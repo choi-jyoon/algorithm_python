@@ -22,8 +22,8 @@ def dfs(i, x, plus, minus, multiply, divide):
         else:
             dfs(i+1, x//arr[i], plus, minus, multiply, divide-1)
     
-max_res = -1e9
-min_res = 1e9
+max_res = float('-inf')
+min_res = float('inf')
 
 dfs(1, arr[0], plus, minus, multiply, divide)
 print(max_res)
