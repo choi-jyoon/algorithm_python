@@ -1,41 +1,36 @@
-n = int(input())
-graph = []
-for _ in range(n):
-    graph.append(list(map(int, input().split())))
-    
-# 1,2,3 번 파이프 순서대로 이동방법
-move_dx = [[[0, 0], [], [0,0,1,1]], [[], [1, 2],[1,1,2,2]], [[1,2], [2,3],[1,1,2,2]]]
-move_dy = [[[1, 2], [], [1,2,1,2]], [[], [0, 0], [0,1,0,1]], [[2, 3],[1,1], [1,2,1,2]]]
+import sys
+input = sys.stdin.readline
 
+n = int(input())
+graph = [list(map(int, input().split())) for _ in range(n)]
+
+# 상태 0: 가로, 1: 세로, 2: 대각선
+moves = {
+    0: [(0, 1, 0), (1, 1, 2)],          # 가로 → 가로 / 대각선
+    1: [(1, 0, 1), (1, 1, 2)],          # 세로 → 세로 / 대각선
+    2: [(0, 1, 0), (1, 0, 1), (1, 1, 2)]# 대각선 → 가로, 세로, 대각선
+}
 
 ans = 0
-visited = [[[False, False, False] for _ in range(n)] for _ in range(n)]
-def dfs(x,y, pipe):
-    global ans
-    if x == n-1 and y == n-1:
-        graph[x][y] +=1
-    for i in range(3):
-        dx = move_dx[pipe]
-        dy = move_dy[pipe]
-        
-        for j in range(3):
-            nx_list = []
-            ny_list = []
-            for k in range(len(dx[j])):
-                nx = x + dx[j][k]
-                ny = y + dy[j][k]
-                
-                if 0<=nx <n and 0<=ny<n:
-                    if graph[nx][ny] != 1:
-                        nx_list.append(nx)
-                        ny_list.append(ny)
-            print(pipe, nx_list, ny_list)
-            if len(nx_list) != 0 and len(nx_list) == len(dx[j]):
-                # visited[nx][ny][j] = True
-                for l in range(len(nx_list)):
-                    graph[nx_list[l]][ny_list[l]] = -1
-                dfs(nx_list[-1], ny_list[-1], j)
 
-visited[0][0][0] = True
-dfs(0,0, 0)
-print(graph)
+def dfs(x, y, state):
+    global ans
+    if x == n - 1 and y == n - 1:
+        ans += 1
+        return
+    
+    for dx, dy, new_state in moves[state]:
+        nx, ny = x + dx, y + dy
+        
+        if 0 <= nx < n and 0 <= ny < n:
+            # 이동 가능한지 체크
+            if new_state == 2:  # 대각선은 세 칸이 모두 비어 있어야 함
+                if graph[x][y+1] or graph[x+1][y] or graph[nx][ny]:
+                    continue
+            else:
+                if graph[nx][ny]:
+                    continue
+            dfs(nx, ny, new_state)
+
+dfs(0, 1, 0)
+print(ans)
